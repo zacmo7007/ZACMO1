@@ -8,6 +8,60 @@
     margin-bottom: 3rem;
     text-align: center;
   }
+  .collection-layout {
+    display: flex;
+    gap: 3rem;
+    align-items: flex-start;
+  }
+  .collection-filters {
+    flex: 0 0 250px;
+    background: var(--color-background-light);
+    padding: 2rem;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.05);
+    position: sticky;
+    top: 120px;
+  }
+  .filter-group {
+    margin-bottom: 2rem;
+  }
+  .filter-group-summary {
+    display: flex;
+    justify-content: space-between;
+    font-weight: 700;
+    cursor: pointer;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+  }
+  .filter-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .filter-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .collection-main {
+    flex: 1;
+  }
+  .collection-sort {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 2rem;
+  }
+  .sort-select {
+    background: rgba(0,0,0,0.5);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.2);
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-family: inherit;
+  }
   .collection-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -19,31 +73,153 @@
     justify-content: center;
     gap: 1rem;
   }
+  @media (max-width: 900px) {
+    .collection-layout {
+      flex-direction: column;
+    }
+    .collection-filters {
+      width: 100%;
+      position: static;
+    }
+  }
 </style>
 
 <div class="collection-page">
   <div class="collection-header">
     <h1 class="heading-section">{{ collection.title }}</h1>
     {% if collection.description != blank %}
-      <div class="text-body">{{ collection.description }}</div>
+      <div class="text-body" style="max-width: 600px; margin: 0 auto;">{{ collection.description }}</div>
     {% endif %}
   </div>
 
-  {% paginate collection.products by 12 %}
-    <div class="collection-grid">
-      {% for product in collection.products %}
-        {% render 'product-card', product: product %}
-      {% else %}
-        <p class="text-body" style="grid-column: 1 / -1; text-align:center;">No products found in this collection.</p>
-      {% endfor %}
-    </div>
+  <div class="collection-layout">
+    <aside class="collection-filters">
+      <form class="filter-form" id="FacetFiltersForm">
+        {%- if collection.current_vendor or collection.current_type -%}
+          <input type="hidden" name="q" value="{{ collection.current_vendor }}{{ collection.current_type }}">
+        {%- endif -%}
+        
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:1rem;">
+          <h2 style="font-size:1.2rem; font-weight:700;">Filters</h2>
+          <a href="{{ collection.url }}?sort_by={{ collection.sort_by }}" style="color:var(--color-text-muted); font-size:0.85rem;">Clear all</a>
+        </div>
 
-    {% if paginate.pages > 1 %}
-      <div class="pagination">
-        {{ paginate | default_pagination }}
+        {%- for filter in collection.filters -%}
+          <details class="filter-group" open>
+            <summary class="filter-group-summary">
+              <span>{{ filter.label }}</span>
+            </summary>
+
+            <div class="filter-group-display">
+              {%- case filter.type -%}
+                {%- when 'boolean' or 'list' -%}
+                  <ul class="filter-list">
+                    {%- for filter_value in filter.values -%}
+                      <li class="filter-item">
+                        <input type="checkbox"
+                          name="{{ filter_value.param_name }}"
+                          value="{{ filter_value.value }}"
+                          id="Filter-{{ filter.param_name }}-{{ forloop.index }}"
+                          {% if filter_value.active -%}checked{%- endif %}
+                          {% if filter_value.count == 0 and filter_value.active == false -%}disabled{%- endif %}
+                          onchange="document.getElementById('FacetFiltersForm').submit();"
+                        >
+                        <label for="Filter-{{ filter.param_name }}-{{ forloop.index }}">{{ filter_value.label }} ({{ filter_value.count }})</label>
+                      </li>
+                    {%- endfor -%}
+                  </ul>
+
+                {%- when 'price_range' -%}
+                  <div class="filter-price" style="display:flex; gap:1rem; align-items:center;">
+                    <div style="flex:1;">
+                      <span style="color:var(--color-text-muted); font-size:0.8rem;">Min</span>
+                      <input name="{{ filter.min_value.param_name }}"
+                        id="Filter-{{ filter.min_value.param_name }}"
+                        {% if filter.min_value.value -%}
+                          value="{{ filter.min_value.value | money_without_currency | replace: ',', '' }}"
+                        {%- endif %}
+                        type="number"
+                        placeholder="0"
+                        min="0"
+                        max="{{ filter.range_max | money_without_currency | replace: ',', '' }}"
+                        style="width:100%; padding:0.5rem; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.2); color:#fff;"
+                      >
+                    </div>
+                    <div style="flex:1;">
+                      <span style="color:var(--color-text-muted); font-size:0.8rem;">Max</span>
+                      <input name="{{ filter.max_value.param_name }}"
+                        id="Filter-{{ filter.max_value.param_name }}"
+                        {% if filter.max_value.value -%}
+                          value="{{ filter.max_value.value | money_without_currency | replace: ',', '' }}"
+                        {%- endif %}
+                        type="number"
+                        placeholder="{{ filter.range_max | money_without_currency | replace: ',', '' }}"
+                        min="0"
+                        max="{{ filter.range_max | money_without_currency | replace: ',', '' }}"
+                        style="width:100%; padding:0.5rem; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.2); color:#fff;"
+                      >
+                    </div>
+                  </div>
+                  <button type="submit" class="btn-secondary" style="width:100%; padding:0.5rem; margin-top:1rem;">Apply</button>
+              {%- endcase -%}
+            </div>
+          </details>
+        {%- endfor -%}
+        
+        <noscript>
+          <button type="submit" class="btn-primary" style="width:100%; margin-top:1rem;">Apply Filters</button>
+        </noscript>
+      </form>
+    </aside>
+
+    <div class="collection-main">
+      <div class="collection-sort">
+        <form id="FacetSortForm">
+          <label for="SortBy" style="color:var(--color-text-muted); margin-right:0.5rem;">Sort by:</label>
+          <select name="sort_by" class="sort-select" id="SortBy" aria-describedby="a11y-refresh-page-message" onchange="document.getElementById('FacetSortForm').submit();">
+            {%- for option in collection.sort_options -%}
+              <option value="{{ option.value | escape }}"{% if option.value == collection.sort_by %} selected="selected"{% endif %}>
+                {{ option.name | escape }}
+              </option>
+            {%- endfor -%}
+          </select>
+          {%- for filter in collection.filters -%}
+            {%- for filter_value in filter.active_values -%}
+              <input type="hidden" name="{{ filter_value.param_name }}" value="{{ filter_value.value }}">
+            {%- endfor -%}
+            {%- if filter.type == "price_range" -%}
+              {%- if filter.min_value.value != null -%}
+                <input type="hidden" name="{{ filter.min_value.param_name }}" value="{{ filter.min_value.value }}">
+              {%- endif -%}
+              {%- if filter.max_value.value != null -%}
+                <input type="hidden" name="{{ filter.max_value.param_name }}" value="{{ filter.max_value.value }}">
+              {%- endif -%}
+            {%- endif -%}
+          {%- endfor -%}
+        </form>
       </div>
-    {% endif %}
-  {% endpaginate %}
+
+      {% paginate collection.products by 12 %}
+        <div class="collection-grid" id="ProductGridContainer">
+          {% for product in collection.products %}
+            {% render 'product-card', product: product %}
+          {% else %}
+            <div style="grid-column: 1 / -1; text-align:center; padding: 4rem 0; background: var(--color-background-light); border-radius: 8px;">
+              <h2 style="margin-bottom:1rem;">No products found</h2>
+              <p class="text-body">Use fewer filters or clear all filters to see more results.</p>
+              <a href="{{ collection.url }}?sort_by={{ collection.sort_by }}" class="btn-primary" style="margin-top:1rem;">Clear all filters</a>
+            </div>
+          {% endfor %}
+        </div>
+
+        {% if paginate.pages > 1 %}
+          <div class="pagination">
+            {{ paginate | default_pagination }}
+          </div>
+        {% endif %}
+      {% endpaginate %}
+    </div>
+  </div>
 </div>
 
 {% schema %}

@@ -36,15 +36,46 @@
     gap: 1.5rem;
     margin-top: 2rem;
   }
-  .variant-selector {
-    padding: 1rem;
-    background: rgba(0,0,0,0.5);
-    border: 1px solid rgba(255,255,255,0.2);
+  .variant-fieldset {
+    border: none;
+    margin: 0 0 1.5rem 0;
+    padding: 0;
+  }
+  .variant-legend {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--color-text-muted);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+  }
+  .variant-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .variant-radio-input {
+    clip: rect(0, 0, 0, 0);
+    overflow: hidden;
+    position: absolute;
+    height: 1px;
+    width: 1px;
+  }
+  .variant-radio-label {
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50px;
+    padding: 0.6rem 1.5rem;
+    color: var(--color-text);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+  }
+  .variant-radio-input:checked + .variant-radio-label {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
     color: #fff;
-    border-radius: 8px;
-    width: 100%;
-    font-family: inherit;
-    font-size: 1.1rem;
+    font-weight: 700;
+  }
+  .variant-radio-input:focus + .variant-radio-label {
+    box-shadow: 0 0 0 2px #fff;
   }
   .submit-btn {
     width: 100%;
@@ -89,16 +120,31 @@
     </div>
 
     {% form 'product', product, class: 'add-to-cart-form', data-type: 'add-to-cart-form' %}
-      <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
+      <input type="hidden" name="id" id="product-variant-id" value="{{ product.selected_or_first_available_variant.id }}">
       
       {% unless product.has_only_default_variant %}
-        <select name="id" class="variant-selector" id="variant-select">
-          {% for variant in product.variants %}
-            <option value="{{ variant.id }}" {% if variant == product.selected_or_first_available_variant %}selected="selected"{% endif %}>
-              {{ variant.title }} - {{ variant.price | money }}
-            </option>
+        <variant-radios class="variant-radios" data-url="{{ product.url }}">
+          {% for option in product.options_with_values %}
+            <fieldset class="variant-fieldset">
+              <legend class="variant-legend">{{ option.name }}</legend>
+              <div class="variant-options">
+                {% for value in option.values %}
+                  <input type="radio" id="{{ section.id }}-{{ option.position }}-{{ forloop.index0 }}"
+                        name="{{ option.name }}"
+                        value="{{ value | escape }}"
+                        {% if option.selected_value == value %}checked{% endif %}
+                        class="variant-radio-input">
+                  <label for="{{ section.id }}-{{ option.position }}-{{ forloop.index0 }}" class="variant-radio-label">
+                    {{ value }}
+                  </label>
+                {% endfor %}
+              </div>
+            </fieldset>
           {% endfor %}
-        </select>
+          <script type="application/json">
+            {{ product.variants | json }}
+          </script>
+        </variant-radios>
       {% endunless %}
 
       <div style="display:flex; gap:1rem; margin-top:1rem;">
@@ -114,6 +160,57 @@
 </div>
 
 {% render 'product-reviews', product: product %}
+
+<script>
+  class VariantRadios extends HTMLElement {
+    constructor() {
+      super();
+      this.addEventListener('change', this.onVariantChange);
+    }
+
+    onVariantChange() {
+      this.updateOptions();
+      this.updateMasterId();
+      this.updateURL();
+    }
+
+    updateOptions() {
+      this.options = Array.from(this.querySelectorAll('input[type="radio"]:checked'), (radio) => radio.value);
+    }
+
+    updateMasterId() {
+      this.currentVariant = this.getVariantData().find((variant) => {
+        return !variant.options.map((option, index) => {
+          return this.options[index] === option;
+        }).includes(false);
+      });
+      
+      if (this.currentVariant) {
+        document.getElementById('product-variant-id').value = this.currentVariant.id;
+        
+        // Update URL
+        window.history.replaceState({ }, '', `${this.dataset.url}?variant=${this.currentVariant.id}`);
+        
+        // Update Price (Optional, requires DOM element for price)
+        const priceElement = document.querySelector('.product-price');
+        if(priceElement) {
+          priceElement.innerHTML = (this.currentVariant.price / 100).toLocaleString('en-US', {style: 'currency', currency: 'USD'});
+        }
+      }
+    }
+
+    updateURL() {
+      if (!this.currentVariant) return;
+      window.history.replaceState({ }, '', `${this.dataset.url}?variant=${this.currentVariant.id}`);
+    }
+
+    getVariantData() {
+      this.variantData = this.variantData || JSON.parse(this.querySelector('[type="application/json"]').textContent);
+      return this.variantData;
+    }
+  }
+  customElements.define('variant-radios', VariantRadios);
+</script>
 
 {% schema %}
 {
