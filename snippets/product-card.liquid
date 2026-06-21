@@ -1,0 +1,18 @@
+<div class="product-card" style="position:relative;">
+  <a href="{{ product.url }}" style="display:block; background:var(--color-background-light); aspect-ratio:3/4; border-radius:4px; overflow:hidden;">
+    {% if product.featured_image %}
+      <img src="{{ product.featured_image | img_url: '400x' }}" alt="{{ product.title | escape }}" style="width:100%; height:100%; object-fit:cover;">
+    {% else %}
+      {{ 'product-1' | placeholder_svg_tag: 'placeholder-svg' }}
+    {% endif %}
+  </a>
+  
+  <button data-wishlist-btn data-product-id="{{ product.id }}" style="position:absolute; top:1rem; right:1rem; width:40px; height:40px; border-radius:50%; background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; color:#fff;">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+  </button>
+  
+  <div style="padding-top: 1rem; display:flex; justify-content:space-between;">
+    <a href="{{ product.url }}" style="font-weight:700; font-size:1.1rem;">{{ product.title }}</a>
+    <span style="color:var(--color-text-muted);">{{ product.price | money }}</span>
+  </div>
+</div>

@@ -1,0 +1,52 @@
+<style>
+  .trending-section {
+    padding: 4rem 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  .trending-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 2rem;
+  }
+  .product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 2rem;
+  }
+</style>
+
+<div class="trending-section">
+  <div class="trending-header">
+    <h2 class="heading-section">Trending <span style="color: var(--color-primary)">Now</span></h2>
+    <a href="/collections/all" class="text-body" style="font-weight:700; color:var(--color-text)">Shop All</a>
+  </div>
+  
+  <div class="product-grid">
+    {% for product in collections[section.settings.collection].products limit: 4 %}
+      {% render 'product-card', product: product %}
+    {% else %}
+      <!-- Placeholder if no collection selected -->
+      <p class="text-body">Select a collection in the theme editor to show trending products.</p>
+    {% endfor %}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Trending Now",
+  "settings": [
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Collection to display"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Trending Now"
+    }
+  ]
+}
+{% endschema %}

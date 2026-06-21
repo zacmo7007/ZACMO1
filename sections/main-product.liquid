@@ -1,0 +1,121 @@
+<style>
+  .product-page {
+    padding: 100px 2rem 4rem;
+    max-width: 1400px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+  }
+  .product-media {
+    width: 100%;
+    aspect-ratio: 4/5;
+    background-color: var(--color-background-light);
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+  }
+  .product-model-viewer {
+    width: 100%;
+    height: 100%;
+    background-color: var(--color-background-light);
+  }
+  .product-details {
+    padding-top: 2rem;
+  }
+  .product-price {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    margin-bottom: 2rem;
+  }
+  .add-to-cart-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-top: 2rem;
+  }
+  .variant-selector {
+    padding: 1rem;
+    background: rgba(0,0,0,0.5);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: #fff;
+    border-radius: 8px;
+    width: 100%;
+    font-family: inherit;
+    font-size: 1.1rem;
+  }
+  .submit-btn {
+    width: 100%;
+    padding: 1.2rem;
+  }
+  @media (max-width: 900px) {
+    .product-page {
+      grid-template-columns: 1fr;
+      gap: 3rem;
+    }
+  }
+</style>
+
+<div class="product-page">
+  <div class="product-media">
+    {% assign 3d_model = product.media | where: "media_type", "model" | first %}
+    
+    {% if 3d_model %}
+      <!-- Native Shopify 3D Viewer -->
+      <model-viewer 
+        class="product-model-viewer" 
+        src="{{ 3d_model.sources.first.url }}" 
+        camera-controls 
+        auto-rotate 
+        ar 
+        environment-image="neutral" 
+        shadow-intensity="1">
+      </model-viewer>
+    {% elsif product.featured_image %}
+      <img src="{{ product.featured_image | img_url: '1000x' }}" alt="{{ product.title | escape }}" style="width:100%; height:100%; object-fit:cover;">
+    {% else %}
+      {{ 'product-1' | placeholder_svg_tag: 'placeholder-svg' }}
+    {% endif %}
+  </div>
+
+  <div class="product-details">
+    <h1 class="heading-section" style="margin-bottom: 0.5rem;">{{ product.title }}</h1>
+    <p class="product-price">{{ product.price | money }}</p>
+    
+    <div class="text-body" style="margin-bottom: 2rem;">
+      {{ product.description }}
+    </div>
+
+    {% form 'product', product, class: 'add-to-cart-form', data-type: 'add-to-cart-form' %}
+      <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
+      
+      {% unless product.has_only_default_variant %}
+        <select name="id" class="variant-selector" id="variant-select">
+          {% for variant in product.variants %}
+            <option value="{{ variant.id }}" {% if variant == product.selected_or_first_available_variant %}selected="selected"{% endif %}>
+              {{ variant.title }} - {{ variant.price | money }}
+            </option>
+          {% endfor %}
+        </select>
+      {% endunless %}
+
+      <div style="display:flex; gap:1rem; margin-top:1rem;">
+        <button type="submit" name="add" class="btn-primary submit-btn">
+          Add to Cart
+        </button>
+        <button type="button" data-wishlist-btn data-product-id="{{ product.id }}" class="btn-secondary" style="width: 56px; padding:0; border-radius:50px;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+        </button>
+      </div>
+    {% endform %}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Product Details",
+  "settings": []
+}
+{% endschema %}

@@ -1,0 +1,18 @@
+{
+  "sections": {
+    "hero": {
+      "type": "hero"
+    },
+    "trending": {
+      "type": "trending"
+    },
+    "reels": {
+      "type": "reels"
+    }
+  },
+  "order": [
+    "hero",
+    "trending",
+    "reels"
+  ]
+}

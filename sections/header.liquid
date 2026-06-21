@@ -1,0 +1,70 @@
+<style>
+  .site-header {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 100;
+    background: rgba(5, 5, 5, 0.8);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .header-logo {
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--color-text);
+    text-transform: uppercase;
+  }
+  .header-logo i {
+    color: var(--color-primary);
+    font-style: italic;
+  }
+  .header-icons {
+    display: flex;
+    gap: 1.5rem;
+  }
+  .icon-btn {
+    color: var(--color-text);
+    position: relative;
+  }
+  .icon-btn:hover {
+    color: var(--color-primary);
+  }
+  .wishlist-count, .cart-count {
+    position: absolute;
+    top: -8px;
+    right: -12px;
+    background: var(--color-primary);
+    color: #fff;
+    font-size: 0.7rem;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+</style>
+
+<header class="site-header">
+  <div class="header-left">
+    <a href="/collections/all">Shop</a>
+  </div>
+  
+  <a href="/" class="header-logo">
+    ZAC<i>MO</i>
+  </a>
+
+  <div class="header-icons">
+    <a href="/account" class="icon-btn">Account</a>
+    <a href="/pages/wishlist" class="icon-btn">
+      Wishlist <span class="wishlist-count">0</span>
+    </a>
+    <a href="/cart" class="icon-btn">
+      Cart <span class="cart-count">{{ cart.item_count }}</span>
+    </a>
+  </div>
+</header>

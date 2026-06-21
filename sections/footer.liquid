@@ -1,0 +1,43 @@
+<style>
+  .site-footer {
+    background-color: var(--color-background-light);
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 4rem 2rem;
+    margin-top: 4rem;
+    text-align: center;
+  }
+  .footer-logo {
+    font-size: 2.5rem;
+    font-weight: 900;
+    margin-bottom: 1rem;
+  }
+  .footer-logo i {
+    color: var(--color-primary);
+    font-style: italic;
+  }
+  .footer-links {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin: 2rem 0;
+  }
+  .footer-bottom {
+    color: var(--color-text-muted);
+    font-size: 0.875rem;
+  }
+</style>
+
+<footer class="site-footer">
+  <div class="footer-logo">ZAC<i>MO</i></div>
+  <p class="text-body">The future of streetwear. Premium quality, electric style.</p>
+  
+  <div class="footer-links">
+    <a href="/pages/custom-designer">Custom Designer</a>
+    <a href="/policies/terms-of-service">Terms</a>
+    <a href="/policies/privacy-policy">Privacy</a>
+  </div>
+  
+  <div class="footer-bottom">
+    &copy; {{ 'now' | date: '%Y' }} ZACMO. All rights reserved.
+  </div>
+</footer>
