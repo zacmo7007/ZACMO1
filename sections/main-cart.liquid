@@ -1,0 +1,170 @@
+<style>
+  .cart-page {
+    padding: 120px 2rem 4rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    min-height: calc(100vh - 200px);
+  }
+  .cart-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 2rem;
+  }
+  .cart-table th {
+    text-align: left;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--color-text-muted);
+    font-weight: 400;
+  }
+  .cart-table td {
+    padding: 2rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+  .cart-item-info {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+  }
+  .cart-item-image {
+    width: 100px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 4px;
+    background: var(--color-background-light);
+  }
+  .cart-item-details a {
+    font-size: 1.2rem;
+    font-weight: 700;
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+  .cart-item-properties {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+  }
+  .qty-input {
+    width: 60px;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.2);
+    color: #fff;
+    padding: 0.5rem;
+    text-align: center;
+  }
+  .cart-footer {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 2rem;
+  }
+  .cart-summary {
+    width: 100%;
+    max-width: 400px;
+    background: var(--color-background-light);
+    padding: 2rem;
+    border-radius: 8px;
+  }
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+  }
+  .checkout-btn {
+    width: 100%;
+    margin-top: 1rem;
+  }
+</style>
+
+<div class="cart-page">
+  <h1 class="heading-section">Your <span style="color:var(--color-primary)">Cart</span></h1>
+  
+  {% if cart.item_count > 0 %}
+    <form action="{{ routes.cart_url }}" method="post" id="cart">
+      <table class="cart-table">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Quantity</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in cart.items %}
+            <tr>
+              <td>
+                <div class="cart-item-info">
+                  {% if item.image %}
+                    <img src="{{ item.image | img_url: '200x' }}" class="cart-item-image" alt="{{ item.title | escape }}">
+                  {% else %}
+                    <!-- Support for Custom Designer base64 images passed in Line Item Properties -->
+                    {% assign custom_image = false %}
+                    {% for property in item.properties %}
+                      {% if property.first == '_CustomImage' %}
+                        <img src="{{ property.last }}" class="cart-item-image" alt="Custom Design">
+                        {% assign custom_image = true %}
+                      {% endif %}
+                    {% endfor %}
+                    {% if custom_image == false %}
+                      {{ 'product-1' | placeholder_svg_tag: 'cart-item-image' }}
+                    {% endif %}
+                  {% endif %}
+                  
+                  <div class="cart-item-details">
+                    <a href="{{ item.url }}">{{ item.product.title }}</a>
+                    {% unless item.product.has_only_default_variant %}
+                      <p style="color:var(--color-text-muted); font-size:0.9rem;">{{ item.variant.title }}</p>
+                    {% endunless %}
+                    
+                    {%- if item.properties.size > 0 -%}
+                      <div class="cart-item-properties">
+                        {%- for property in item.properties -%}
+                          {%- assign property_first_char = property.first | slice: 0 -%}
+                          {%- if property.last != blank and property_first_char != '_' -%}
+                            <div>{{ property.first }}: {{ property.last }}</div>
+                          {%- endif -%}
+                        {%- endfor -%}
+                      </div>
+                    {%- endif -%}
+
+                    <a href="{{ item.url_to_remove }}" style="color:var(--color-primary); font-size:0.85rem; margin-top:1rem; display:inline-block;">Remove</a>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <input type="number" name="updates[]" id="updates_{{ item.key }}" value="{{ item.quantity }}" min="0" class="qty-input">
+              </td>
+              <td>
+                <span style="font-weight:700;">{{ item.final_line_price | money }}</span>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      
+      <div class="cart-footer">
+        <div class="cart-summary">
+          <div class="summary-row">
+            <span>Subtotal</span>
+            <span style="font-weight:700;">{{ cart.total_price | money }}</span>
+          </div>
+          <p style="color:var(--color-text-muted); font-size:0.9rem; margin-bottom:1.5rem;">Taxes and shipping calculated at checkout</p>
+          
+          <button type="submit" name="update" class="btn-secondary" style="width:100%; margin-bottom:1rem; padding:1rem;">Update Cart</button>
+          <button type="submit" name="checkout" class="btn-primary checkout-btn">Proceed to Checkout</button>
+        </div>
+      </div>
+    </form>
+  {% else %}
+    <p class="text-body" style="text-align:center; margin-top:4rem;">Your cart is currently empty.</p>
+    <div style="text-align:center; margin-top:2rem;">
+      <a href="/collections/all" class="btn-primary">Continue Shopping</a>
+    </div>
+  {% endif %}
+</div>
+
+{% schema %}
+{
+  "name": "Cart Page",
+  "settings": []
+}
+{% endschema %}

@@ -1,0 +1,91 @@
+<style>
+  .search-page {
+    padding: 120px 2rem 4rem;
+    max-width: 1400px;
+    margin: 0 auto;
+    min-height: calc(100vh - 200px);
+  }
+  .search-header {
+    text-align: center;
+    margin-bottom: 4rem;
+  }
+  .search-form {
+    max-width: 600px;
+    margin: 0 auto 2rem;
+    position: relative;
+    display: flex;
+  }
+  .search-input {
+    width: 100%;
+    padding: 1.2rem 2rem;
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50px 0 0 50px;
+    color: var(--color-text);
+    font-family: inherit;
+    font-size: 1.1rem;
+  }
+  .search-input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+  }
+  .search-submit {
+    background: var(--color-primary);
+    color: #fff;
+    padding: 0 2rem;
+    border-radius: 0 50px 50px 0;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+  .search-results {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 2rem;
+  }
+</style>
+
+<div class="search-page">
+  <div class="search-header">
+    <h1 class="heading-section">
+      {% if search.performed %}
+        Results for "<span style="color:var(--color-primary)">{{ search.terms | escape }}</span>"
+      {% else %}
+        <span style="color:var(--color-primary)">Search</span> ZACMO
+      {% endif %}
+    </h1>
+    
+    <form action="{{ routes.search_url }}" method="get" role="search" class="search-form">
+      <input type="hidden" name="type" value="product">
+      <input 
+        type="search" 
+        name="q" 
+        value="{{ search.terms | escape }}" 
+        placeholder="Search for streetwear, collections, etc." 
+        class="search-input"
+        autofocus
+      >
+      <button type="submit" class="search-submit">Search</button>
+    </form>
+  </div>
+
+  {% if search.performed %}
+    {% if search.results_count > 0 %}
+      <div class="search-results">
+        {% for item in search.results %}
+          {% if item.object_type == 'product' %}
+            {% render 'product-card', product: item %}
+          {% endif %}
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="text-body" style="text-align:center;">No results found. Try adjusting your search terms.</p>
+    {% endif %}
+  {% endif %}
+</div>
+
+{% schema %}
+{
+  "name": "Search Page",
+  "settings": []
+}
+{% endschema %}

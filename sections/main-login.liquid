@@ -1,0 +1,93 @@
+<style>
+  .customer-auth {
+    min-height: calc(100vh - 200px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
+  .auth-box {
+    background: var(--color-background-light);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    padding: 3rem;
+    width: 100%;
+    max-width: 450px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+  }
+  .auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  .input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .input-group label {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--color-text-muted);
+  }
+  .auth-input {
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    color: var(--color-text);
+    font-family: inherit;
+    transition: all var(--transition-fast);
+  }
+  .auth-input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+  }
+  .errors {
+    color: var(--color-primary);
+    font-size: 0.9rem;
+    background: rgba(255,0,60,0.1);
+    padding: 1rem;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+  }
+</style>
+
+<div class="customer-auth">
+  <div class="auth-box">
+    <h1 class="heading-section" style="text-align: center; margin-bottom: 2rem;">Sign <span style="color:var(--color-primary);">In</span></h1>
+    
+    {% form 'customer_login', class: 'auth-form' %}
+      {% if form.errors %}
+        <div class="errors">
+          {{ form.errors | default_errors }}
+        </div>
+      {% endif %}
+
+      <div class="input-group">
+        <label for="CustomerEmail">Email</label>
+        <input type="email" name="customer[email]" id="CustomerEmail" class="auth-input" required autocomplete="email" autocorrect="off" autocapitalize="off">
+      </div>
+
+      {% if form.password_needed %}
+        <div class="input-group">
+          <label for="CustomerPassword">Password</label>
+          <input type="password" name="customer[password]" id="CustomerPassword" class="auth-input" required>
+        </div>
+      {% endif %}
+
+      <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1rem;">Sign In</button>
+      
+      <div style="text-align:center; margin-top:1.5rem; color:var(--color-text-muted); font-size:0.9rem;">
+        <a href="{{ routes.account_register_url }}" style="color:var(--color-primary); font-weight:700;">Create account</a>
+      </div>
+    {% endform %}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Customer Login",
+  "settings": []
+}
+{% endschema %}

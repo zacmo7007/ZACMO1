@@ -181,7 +181,45 @@
       // In a real Shopify scenario, you'd generate the image via toDataURL
       // and attach it as a Line Item Property to a base dummy product using AJAX cart.
       const image = canvas.toDataURL('image/png');
-      alert('Custom design added to cart! (This integrates with Shopify AJAX Cart via Line Item Properties)');
+      
+      const formData = {
+        'items': [{
+          'id': 1, // REQUIRES A REAL VARIANT ID
+          'quantity': 1,
+          'properties': {
+            'Custom Text': state.text,
+            'Text Color': state.textColor,
+            'Garment Color': state.garmentColor,
+            '_CustomImage': image
+          }
+        }]
+      };
+
+      // Since we don't have a real variant ID hardcoded, we'll try to fetch the first available product in the store
+      fetch('/products.json?limit=1')
+        .then(response => response.json())
+        .then(data => {
+          if(data.products.length > 0) {
+            formData.items[0].id = data.products[0].variants[0].id;
+            
+            fetch(window.Shopify.routes.root + 'cart/add.js', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(formData)
+            })
+            .then(response => {
+              window.location.href = '/cart';
+            })
+            .catch((error) => {
+              console.error('Error:', error);
+              alert('Error adding to cart. Please try again.');
+            });
+          } else {
+            alert('Store needs at least one product to act as the base garment for custom designs.');
+          }
+        });
     });
   });
 </script>

@@ -1,0 +1,50 @@
+<style>
+  .product-reviews-section {
+    margin-top: 4rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 4rem;
+  }
+  .spr-container {
+    background: var(--color-background-light);
+    border-radius: 16px;
+    padding: 2.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+  /* Overrides for standard Shopify Product Reviews App to match ZACMO brand */
+  .spr-header-title {
+    font-family: var(--font-primary) !important;
+    font-size: 2rem !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    margin-bottom: 1rem !important;
+  }
+  .spr-summary-actions-newreview {
+    background: var(--color-primary) !important;
+    color: #fff !important;
+    border-radius: 50px !important;
+    padding: 0.8rem 2rem !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    float: right !important;
+  }
+  .spr-review {
+    border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+    padding: 2rem 0 !important;
+  }
+  .spr-starratings, .spr-icon {
+    color: var(--color-primary) !important;
+  }
+  .spr-form-input {
+    background: rgba(0, 0, 0, 0.5) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    color: #fff !important;
+    border-radius: 8px !important;
+    padding: 1rem !important;
+  }
+</style>
+
+<div class="product-reviews-section" id="reviews">
+  <div class="spr-container">
+    <div id="shopify-product-reviews" data-id="{{product.id}}">{{ product.metafields.spr.reviews }}</div>
+  </div>
+</div>
