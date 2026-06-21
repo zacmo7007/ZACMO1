@@ -1,0 +1,36 @@
+<style>
+  .page-404 {
+    height: calc(100vh - 200px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 2rem;
+  }
+  .error-code {
+    font-size: clamp(6rem, 15vw, 12rem);
+    font-weight: 900;
+    line-height: 1;
+    color: var(--color-background-light);
+    -webkit-text-stroke: 2px var(--color-primary);
+    text-stroke: 2px var(--color-primary);
+    margin-bottom: 1rem;
+  }
+</style>
+
+<div class="page-404">
+  <div class="error-code">404</div>
+  <h1 class="heading-section" style="margin-bottom: 1rem;">Lost in the <span style="color:var(--color-primary);">Void</span></h1>
+  <p class="text-body" style="max-width: 500px; margin-bottom: 2rem;">
+    The page you are looking for has been moved, deleted, or possibly never existed. 
+  </p>
+  <a href="/" class="btn-primary">Return Home</a>
+</div>
+
+{% schema %}
+{
+  "name": "404 Page",
+  "settings": []
+}
+{% endschema %}

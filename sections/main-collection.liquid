@@ -1,0 +1,54 @@
+<style>
+  .collection-page {
+    padding: 120px 2rem 4rem;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  .collection-header {
+    margin-bottom: 3rem;
+    text-align: center;
+  }
+  .collection-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 2rem;
+  }
+  .pagination {
+    margin-top: 4rem;
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+  }
+</style>
+
+<div class="collection-page">
+  <div class="collection-header">
+    <h1 class="heading-section">{{ collection.title }}</h1>
+    {% if collection.description != blank %}
+      <div class="text-body">{{ collection.description }}</div>
+    {% endif %}
+  </div>
+
+  {% paginate collection.products by 12 %}
+    <div class="collection-grid">
+      {% for product in collection.products %}
+        {% render 'product-card', product: product %}
+      {% else %}
+        <p class="text-body" style="grid-column: 1 / -1; text-align:center;">No products found in this collection.</p>
+      {% endfor %}
+    </div>
+
+    {% if paginate.pages > 1 %}
+      <div class="pagination">
+        {{ paginate | default_pagination }}
+      </div>
+    {% endif %}
+  {% endpaginate %}
+</div>
+
+{% schema %}
+{
+  "name": "Collection details",
+  "settings": []
+}
+{% endschema %}
